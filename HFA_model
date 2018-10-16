@@ -42,6 +42,7 @@ hfa.dtypes
 #######################################################################
 
 hfa['age'] = pd.to_numeric(hfa['age'])
+hfa = hfa.replace({'gender': {'m':1,'f':2}})
 hfa.info()
 
 #######################################################################
@@ -71,7 +72,7 @@ hfa['age'].max()
 
 #data분리-train,test
 
-X=hfa.iloc[:,[0,1,2,3,4,5,6,7,8,9,10,17]]
+X=hfa.iloc[:,[0,1,2,3,4,5,6,7,8,9,10,11,17]]
 y=hfa.iloc[:,20:21]
 
 from sklearn.model_selection import train_test_split
