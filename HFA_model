@@ -1,0 +1,187 @@
+from IPython.display import display
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import mglearn
+
+import os
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+
+import graphviz
+import warnings
+warnings.filterwarnings(action='ignore') 
+
+#######################################################################
+
+###1.데이터 수집&확인
+hfa=pd.read_csv('C:/data.arff')
+hfa.head() 
+
+#######################################################################
+
+hfa.describe()
+
+#######################################################################
+
+hfa.replace("?",np.nan,inplace=True)
+hfa.isnull().sum() 
+
+#######################################################################
+
+print("old : {}".format(len(hfa)))
+    
+hfa=hfa[-(hfa['age'].isnull())& 
+        -(hfa['ethnicity'].isnull())&
+        -(hfa['relation'].isnull())]
+
+print("new : {}".format(len(hfa))) 
+
+#######################################################################
+hfa.dtypes
+
+#######################################################################
+
+hfa['age'] = pd.to_numeric(hfa['age'])
+hfa.info()
+
+#######################################################################
+
+hfa.head()
+
+#######################################################################
+
+import seaborn as sns
+
+p1=sns.boxplot(x='Class/ASD',y='result',data=hfa)
+p1 
+
+#######################################################################
+
+#p2=sns.boxplot(x='Class/ASD',y='age',data=hfa)
+#p2 
+
+#agemean = int(hfa['age'].mean())
+#print(agemean)
+hfa.loc[hfa.age == 383, 'age'] = 30
+#hfa[hfa['age'] == hfa['age'].max()]['age'] = agemean
+hfa['age'].max()
+#print(hfa['age'].max())
+
+#######################################################################
+
+#data분리-train,test
+
+X=hfa.iloc[:,[0,1,2,3,4,5,6,7,8,9,10,17]]
+y=hfa.iloc[:,20:21]
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42) 
+
+print(X.head())
+print(y.head())
+
+#######################################################################
+
+#scaling 4가지 시도
+# scale(x) : 기본 스케일, 평균과 표준편차 사용
+from sklearn.preprocessing import StandardScaler
+
+scaler1 = StandardScaler()
+X_train1=scaler1.fit(X_train)
+X_train1=scaler1.transform(X_train)
+X_test1=scaler1.transform(X_test) 
+
+# robust_scale(x) : 중앙값과 IQR 사용, 아웃라이어의 영향을 최소화
+from sklearn.preprocessing import RobustScaler
+
+scaler2 = RobustScaler()
+X_train2=scaler2.fit(X_train)
+X_train2=scaler2.transform(X_train)
+X_test2=scaler2.transform(X_test)
+
+# minmax_scale(x) : 최대/최소값이 각각 1,0이 되도록 스케일링
+from sklearn.preprocessing import MinMaxScaler
+scaler3=MinMaxScaler()
+X_train3=scaler3.fit(X_train)
+X_train3=scaler3.transform(X_train)
+X_test3=scaler3.transform(X_test)
+
+# maxabs_scale(x) : 최대절대값과 0이 각각 1,0이 되도록 스케일링
+from sklearn.preprocessing import MaxAbsScaler
+scaler4=MaxAbsScaler()
+X_train4=scaler4.fit(X_train)
+X_train4=scaler4.transform(X_train)
+X_test4=scaler4.transform(X_test)
+
+print("X_train1 :\n", X_train1)
+print()
+print("X_train2 :\n", X_train2)
+print()
+print("X_train3 :\n",X_train3) 
+print()
+print("X_train4 :\n",X_train4)
+print()
+print()
+print("X_test1 :\n", X_test1)
+print()
+print("X_test2 :\n", X_test2)
+print()
+print("X_test3 :\n",X_test3) 
+print()
+print("X_test4 :\n",X_test4) 
+
+#######################################################################
+
+from sklearn.svm import SVC
+
+svc = SVC() # default value : 'auto'(C=1 and gamma = 1 / X_train.shape(1))
+svc.fit(X_train1,y_train)
+svc.fit(X_train2,y_train)
+svc.fit(X_train3,y_train)
+svc.fit(X_train4,y_train)
+
+print("train accuracy1 = {}".format(svc.score(X_train1,y_train)))
+print("test accuracy1 = {}".format(svc.score(X_test1,y_test)))
+print()
+print("train accuracy2 = {}".format(svc.score(X_train2,y_train)))
+print("test accuracy2 = {}".format(svc.score(X_test2,y_test)))
+print()
+print("train accuracy3 = {}".format(svc.score(X_train3,y_train)))
+print("test accuracy3 = {}".format(svc.score(X_test3,y_test)))
+print()
+print("train accuracy4 = {}".format(svc.score(X_train4,y_train)))
+print("test accuracy4 = {}".format(svc.score(X_test4,y_test)))
+
+#######################################################################
+
+# C=1 -> C=10 
+
+svc = SVC(C=10)
+
+svc.fit(X_train1,y_train)
+svc.fit(X_train2,y_train)
+svc.fit(X_train3,y_train)
+svc.fit(X_train4,y_train)
+
+print("train accuracy1 = {}".format(svc.score(X_train1,y_train)))
+print("test accuracy1 = {}".format(svc.score(X_test1,y_test)))
+print()
+print("train accuracy2 = {}".format(svc.score(X_train2,y_train)))
+print("test accuracy2 = {}".format(svc.score(X_test2,y_test)))
+print()
+print("train accuracy3 = {}".format(svc.score(X_train3,y_train)))
+print("test accuracy3 = {}".format(svc.score(X_test3,y_test)))
+print()
+print("train accuracy4 = {}".format(svc.score(X_train4,y_train)))
+print("test accuracy4 = {}".format(svc.score(X_test4,y_test)))
+
+
+
+
+
+
+
+
+
+
+
